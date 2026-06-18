@@ -75,12 +75,15 @@ JWT · хеширование пароля (bcrypt) · эндпоинты про
 
 ## Отчёт (GitHub Pages)
 
-Подробный отчёт собирается из каталога `docs/` (mkdocs, тема material):
+Отчёт по всем лабораторным собран в единый mkdocs-сайт на уровне студента
+(`students/k3341/Maistrenko_Anastasia/`, тема material). Страницы ЛР1 — в разделе
+«ЛР1».
 
 ```bash
+cd ..                       # students/k3341/Maistrenko_Anastasia/
 pip install mkdocs-material
-mkdocs serve     # локальный просмотр
-mkdocs gh-deploy # публикация на GitHub Pages
+mkdocs serve                # локальный просмотр
+mkdocs gh-deploy            # публикация на GitHub Pages
 ```
 
-Ссылка на опубликованный отчёт: <https://may-na.github.io/ITMO_ICT_WebDevelopment_tools_2025-2026/>
+Опубликованный отчёт: <https://may-na.github.io/ITMO_ICT_WebDevelopment_tools_2025-2026/>

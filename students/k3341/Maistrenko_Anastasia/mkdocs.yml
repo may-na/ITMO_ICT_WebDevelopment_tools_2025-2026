@@ -1,0 +1,60 @@
+site_name: "Веб-разработка · Майстренко Анастасия (К3341)"
+site_description: "Лабораторные работы по курсу «Средства Web-программирования»"
+docs_dir: docs
+
+theme:
+  name: material
+  language: ru
+  palette:
+    - scheme: default
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-night
+        name: Тёмная тема
+    - scheme: slate
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-sunny
+        name: Светлая тема
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+
+repo_url: https://github.com/may-na/ITMO_ICT_WebDevelopment_tools_2025-2026
+repo_name: may-na/ITMO_ICT_WebDevelopment_tools
+
+nav:
+  - Главная: index.md
+  - "ЛР1 — FastAPI":
+      - "Обзор": lab1/index.md
+      - "Модели и сущности": lab1/models.md
+      - "Подключение к БД и миграции": lab1/database.md
+      - "Аутентификация (JWT)": lab1/auth.md
+      - "Эндпоинты API": lab1/endpoints.md
+      - "Практика 1. Основы FastAPI": lab1/practice_1.md
+      - "Практика 2. БД, SQLModel и связи": lab1/practice_2.md
+      - "Практика 3. Миграции, .env, .gitignore": lab1/practice_3.md
+  - "ЛР2 — Потоки/Процессы/Async":
+      - "Обзор": lab2/index.md
+      - "Задача 1. CPU-bound (сумма чисел)": lab2/task1.md
+      - "Задача 2. I/O-bound (парсинг)": lab2/task2.md
+      - "Выводы и сравнение": lab2/results.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format

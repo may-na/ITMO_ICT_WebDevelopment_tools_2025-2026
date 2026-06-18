@@ -1,0 +1,6 @@
+requests==2.32.3
+beautifulsoup4==4.12.3
+aiohttp==3.11.11
+certifi>=2024.7.4
+psycopg2-binary==2.9.10
+python-dotenv==1.0.1
