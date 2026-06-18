@@ -1,0 +1,82 @@
+# Оркестрация всех сервисов ЛР3:
+#   db      — PostgreSQL (база из ЛР1)
+#   web     — основное приложение FastAPI (+ маршруты /parser/*)
+#   parser  — отдельный сервис-парсер (вызывается по HTTP)
+#   redis   — брокер и хранилище результатов для Celery
+#   worker  — Celery worker (фоновая обработка задач парсинга)
+#   beat    — Celery beat (периодические задачи) — бонус
+#
+# worker и beat переиспользуют образ web (lab3-web), меняя только команду.
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: finance_db
+    ports:
+      - "5435:5432"        # хостовый 5435, чтобы не конфликтовать с локальным PostgreSQL
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d finance_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: ./web
+    image: lab3-web:latest
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/finance_db
+      SECRET_KEY: docker-dev-secret-change-me
+      PARSER_URL: http://parser:8001
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  parser:
+    build: ./parser
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/finance_db
+    ports:
+      - "8001:8001"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  redis:
+    image: redis:7-alpine
+
+  worker:
+    image: lab3-web:latest
+    command: celery -A app.core.celery_app:celery_app worker --loglevel=info
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/finance_db
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  beat:
+    image: lab3-web:latest
+    command: celery -A app.core.celery_app:celery_app beat --loglevel=info
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    depends_on:
+      redis:
+        condition: service_started
+
+volumes:
+  pgdata:

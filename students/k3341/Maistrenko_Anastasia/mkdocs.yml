@@ -42,6 +42,10 @@ nav:
       - "Задача 1. CPU-bound (сумма чисел)": lab2/task1.md
       - "Задача 2. I/O-bound (парсинг)": lab2/task2.md
       - "Выводы и сравнение": lab2/results.md
+  - "ЛР3 — Docker и очереди":
+      - "Обзор": lab3/index.md
+      - "Docker и вызов по HTTP": lab3/docker.md
+      - "Очередь Celery (Redis)": lab3/queue.md
 
 markdown_extensions:
   - admonition
