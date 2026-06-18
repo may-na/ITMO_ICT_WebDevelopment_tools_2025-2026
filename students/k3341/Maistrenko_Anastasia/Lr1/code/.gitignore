@@ -1,0 +1,25 @@
+# Виртуальное окружение
+.venv/
+venv/
+env/
+
+# Переменные окружения с секретами (в репозиторий попадает только .env.example)
+.env
+*.env
+!.env.example
+
+# Кэш Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Базы данных, логи
+*.sqlite3
+*.db
+*.log
+
+# Системные файлы / IDE
+.DS_Store
+.idea/
+.vscode/

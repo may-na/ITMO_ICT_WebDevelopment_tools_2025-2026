@@ -1,0 +1,19 @@
+# Виртуальные окружения
+.venv/
+venv/
+env/
+
+# Кэш Python
+__pycache__/
+*.py[cod]
+
+# Секреты (в репозиторий идёт только .env.example)
+.env
+*.env
+!.env.example
+
+# Сборка отчёта mkdocs и системные файлы
+site/
+.DS_Store
+.idea/
+.vscode/

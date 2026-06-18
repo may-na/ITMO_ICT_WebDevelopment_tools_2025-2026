@@ -1,0 +1,55 @@
+site_name: "ЛР1 — FastAPI «Личные финансы» · Майстренко Анастасия"
+site_description: "Отчёт по лабораторной работе 1: серверное приложение на FastAPI"
+docs_dir: docs
+
+theme:
+  name: material
+  language: ru
+  palette:
+    - scheme: default
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-night
+        name: Тёмная тема
+    - scheme: slate
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-sunny
+        name: Светлая тема
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - toc.integrate
+
+repo_url: https://github.com/may-na/ITMO_ICT_WebDevelopment_tools_2025-2026
+repo_name: may-na/ITMO_ICT_WebDevelopment_tools
+
+nav:
+  - Главная: index.md
+  - Практики:
+      - "Практика 1. Основы FastAPI": practice_1.md
+      - "Практика 2. БД, SQLModel и связи": practice_2.md
+      - "Практика 3. Миграции, .env, .gitignore": practice_3.md
+  - Приложение (задание ЛР):
+      - "Модели и сущности": models.md
+      - "Подключение к БД и миграции": database.md
+      - "Аутентификация (JWT)": auth.md
+      - "Эндпоинты API": endpoints.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
