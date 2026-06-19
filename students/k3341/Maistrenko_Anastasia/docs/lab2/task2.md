@@ -25,7 +25,23 @@ def save_page(url, title, approach):
 ```
 
 Новое короткоживущее подключение на каждое сохранение — безопасно и для потоков,
-и для процессов (соединение psycopg2 нельзя разделять между процессами).
+и для процессов (соединение psycopg2 нельзя разделять между процессами). Так
+пишут в БД версии **threading** и **multiprocessing**.
+
+Async-версия пишет в БД **по-настоящему асинхронно** — через драйвер `asyncpg`
+(пул соединений, операции `await`), не блокируя цикл событий:
+
+```python
+async def create_async_pool():
+    return await asyncpg.create_pool(dsn=DATABASE_URL, min_size=1, max_size=10)
+
+async def save_page_async(pool, url, title, approach):
+    async with pool.acquire() as conn:                 # соединение из пула
+        await conn.execute(
+            "INSERT INTO parsed_page (url, title, approach) VALUES ($1, $2, $3);",
+            url, title, approach,
+        )
+```
 
 Список URL делится на равные части (`urls.split_list`), кроме async, где все
 запросы и так запускаются конкурентно одним `gather`.
@@ -72,13 +88,14 @@ def run(urls, workers):
 
 ```python
 async def parse_and_save(url):
-    async with _session.get(url) as response:
+    async with _session.get(url) as response:            # запрос — aiohttp
         html = await response.text()
     soup = BeautifulSoup(html, "html.parser")
     title = soup.title.string.strip() if soup.title else "(без заголовка)"
-    await asyncio.to_thread(save_page, url, title, "async")   # sync-запись в БД — в пуле потоков
+    await save_page_async(_pool, url, title, "async")     # запись в БД — asyncpg (await)
 
 async def run(urls):
+    _pool = await create_async_pool()                    # пул соединений asyncpg
     ssl_context = ssl.create_default_context(cafile=certifi.where())
     connector = aiohttp.TCPConnector(ssl=ssl_context)
     async with aiohttp.ClientSession(headers=HEADERS, connector=connector) as session:
@@ -89,8 +106,8 @@ async def run(urls):
 
 - один поток обслуживает все запросы сразу — пока одна страница грузится, цикл
   событий переключается на другие;
-- запись в БД синхронная (psycopg2), поэтому выполняется через
-  `asyncio.to_thread`, чтобы не блокировать цикл событий;
+- запись в БД тоже **асинхронная** — через драйвер `asyncpg` (пул соединений,
+  `await`), поэтому цикл событий не блокируется ни на сети, ни на работе с БД;
 - на macOS aiohttp не использует системные сертификаты, поэтому SSL-контекст
   берётся из `certifi` (иначе `CERTIFICATE_VERIFY_FAILED`).
 

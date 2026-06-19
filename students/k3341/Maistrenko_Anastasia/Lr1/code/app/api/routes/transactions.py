@@ -51,6 +51,19 @@ def _validate_category(category_id: int, session: Session, user: User) -> Catego
     return category
 
 
+def _check_sufficient_funds(account: Account, t_type: TransactionType, amount: float) -> None:
+    """Проверить, что на счёте достаточно средств для расхода/перевода.
+
+    Для дохода проверка не нужна. Если денег не хватает — отдаём 400.
+    """
+    if t_type in (TransactionType.expense, TransactionType.transfer) and amount > account.balance:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            f"Недостаточно средств на счёте «{account.name}»: "
+            f"баланс {account.balance}, требуется {amount}",
+        )
+
+
 @router.get("", response_model=List[TransactionReadDetailed])
 def list_transactions(
     account_id: Optional[int] = Query(default=None, description="Фильтр по счёту"),
@@ -77,6 +90,9 @@ def create_transaction(
     account = _validate_account(data.account_id, session, current_user)
     if data.category_id is not None:
         _validate_category(data.category_id, session, current_user)
+
+    # Базовая валидация: нельзя потратить больше, чем есть на счёте
+    _check_sufficient_funds(account, data.type, data.amount)
 
     transaction = Transaction(
         amount=data.amount,
@@ -143,6 +159,14 @@ def update_transaction(
     new_account = session.get(Account, transaction.account_id)
     if new_account is not None:
         new_account.balance += signed_amount(transaction.type, transaction.amount)
+        # Базовая валидация: после изменения баланс не должен уйти в минус.
+        # commit ещё не было — при ошибке сессия закроется без сохранения.
+        if new_account.balance < 0:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                f"Недостаточно средств на счёте «{new_account.name}» "
+                f"для изменённой операции (итоговый баланс был бы {new_account.balance})",
+            )
 
     session.add(transaction)
     session.commit()
